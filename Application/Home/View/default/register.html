@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>注册</title>
+    <link href="__PUBLIC__/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="__ROOT__/Application/Home/View/default/css/login.css" rel="stylesheet">
+    <script type="text/javascript">
+     window.CG = {
+      "ROOT"   : "__ROOT__",
+      "APP"    : "__APP__",
+      "PUBLIC" : "__PUBLIC__",
+      "DOMAIN" : "{:cg_domain()}",
+      "CONTROLLER":"__CONTROLLER__"
+    }
+    </script>
+  </head>
+  <body>
+  <div class="container">
+    <div class="sign-page">
+    	<div class="logo text-center">
+       share 
+      </div>
+    	<h4 class="title text-center">
+        <span>
+          <a href="{:U('Users/login')}" id="link-signin" >登录</a>
+          <b class="text-muted">·</b>
+          <a href="{:U('Users/register')}" id="link-signup"style="color:#000;" class="text-muted" href="##">注册</a>
+        </span>
+      </h4>
+    
+    	<div class="sign-container">
+        <div id="error-msg" class="alert alert-warning alert-dismissible error text-center" style="display:none;">
+          <button type="button" class="close" data-dismiss="alert" ><span >&times;</span></button>
+        </div>
+       <!--注册-->
+       <form id="signup" action="{:U('/Uers/checkRegister')}" method="post" >        
+          <div class="form-group">
+            <label class="control-label sr-only"for="signup-email">邮箱</label>
+            <div class="input-group">
+              <span class="input-group-addon"><span class="glyphicon glyphicon-envelope"></span></span>
+              <input type="input" name="signup-email" id="signup-email"class="form-control input-lg"
+              autofocus="autofocus" required="required" placeholder="请输入邮箱">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label sr-only"for="signup-username">昵称</label>
+            <div class="input-group">
+              <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+              <input type="input" name="signup-username"id="signup-username"class="form-control input-lg" 
+               required="required" placeholder="请输入昵称">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label sr-only"for="signup-password">密码</label>
+            <div class="input-group">
+              <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+              <input type="password"name="signup-password"id="signup-password"class="form-control input-lg"
+               required="required" placeholder="请输入密码">
+            </div>
+          </div>
+          <div style="max-width:150px;position:relative;">
+              <input type="text" class="form-control input-lg" name="signup-captcha"id="signup-captcha"
+               required="required"placeholder="验证码" >
+              <div id='signup-cap-container'style="position:absolute; top:3px;left:160px;width:140px;height:40px;">
+               <img id="captcha" style="width:140px;height:40px;" />
+              </div>
+          </div>
+        <a id='signup-gen-cap'href="javaScript:getVerify();">看不清楚？换一张</a>
+          <input type="submit" class="btn btn-success btn-lg btn-block text-center" id="btn-signup" value="注册">
+        </form> 
+      </div>
+    	<div class="sign-sns"></div>
+    </div>
+  </div>
+<!-- 忘记密码模态窗体 -->
+<div class="modal fade bs-example-modal-sm" id='modal-forget-password'tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+         通过注册邮箱重置密码 
+      </div>
+      <div class="modal-body">
+        <input id="reset-password-email"type="text" class='form-control' placeholder='请填写注册邮箱'>
+      </div>
+      <div class="modal-footer">
+        <button id="btn-send-email"type="button" class="btn btn-success">发送邮件</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script src="__PUBLIC__/js/jquery.min.js"></script>
+    <script src="__PUBLIC__/js/jquery.form.js"></script>
+    <script src="__PUBLIC__/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="__ROOT__/Application/Home/View/default/js/login.js"></script>
+    <script type="text/javascript">
+    $(function(){getVerify()});
+    </script>
+  
+  </body>
+</html>

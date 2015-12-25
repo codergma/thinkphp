@@ -1,0 +1,55 @@
+.sign-page{
+  padding-top: 100px;
+  padding-bottom: 50px;
+  width: 940px;
+  margin: 0 auto;
+}
+.logo{
+  font-size: 150px;
+  color: pink;
+}
+.title{
+  margin: 70px 0 50px;
+  border-bottom: solid 1px #eeeeee;
+}
+.title span{
+  position: relative;
+  top:10px;
+  background-color: rgba(255,255,255,1);
+}
+.title a{
+  padding: 0 15px;
+  font-weight:bold;
+  text-decoration: none;
+  color:#777;
+}
+
+.title a:hover{
+  color: #000;
+}
+.title b{
+  padding: 0 5px;
+}
+.sign-container{
+  padding: 0 320px;
+  padding-bottom: 20px;     
+}
+.error{
+  width:700px;
+  margin:0 auto;
+}
+#forget-password{
+  padding-left:150px;
+  color: #333;
+  text-decoration:none;
+}
+#error-msg{
+  margin-top: 50px;
+  width:300px;
+}
+#signin-gen-cap,#signup-gen-cap{
+  margin-left:180px;
+}
+#btn-signup{
+  margin-top: 10px;
+}
