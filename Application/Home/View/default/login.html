@@ -36,12 +36,12 @@
           <button type="button" class="close" data-dismiss="alert" ><span >&times;</span></button>
         </div>
         <!--登录-->
-        <form id="signin" action="{:U('/Users/checkLogin')}" method="post">
+        <form id="signin" action="{:U('Home/Users/checkLogin')}" method="post">
           <div class="form-group">
-            <label class="control-label sr-only" for="singin-username">用户名</label>
+            <label class="control-label sr-only" for="singin-user_name">用户名</label>
             <div class="input-group">
               <span class="input-group-addon "><span class="glyphicon glyphicon-user"></span></span>
-              <input type="input" class="form-control input-lg" name="signin-username"id="signin-username"
+              <input type="input" class="form-control input-lg" name="loginuser_name"id="loginuser_name"
                required="required"autofocus="autofocus"  placeholder="用户名" >
             </div>
           </div>
@@ -49,22 +49,22 @@
             <label class="control-lable sr-only" for="signin-password">密码</label>
             <div class="input-group">
               <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
-              <input type="password" class="form-control input-lg" name="signin-password"id="signup-password"
+              <input type="password" class="form-control input-lg" name="loginPassword"id="loginPassword"
                required="required"autofocus="autofocus"  placeholder="密码" >
             </div>
           </div>
           <div style="max-width:150px;position:relative;">
-              <input type="text" class="form-control input-lg" name="signin-captcha"id="signin-captcha"
+              <input type="text" class="form-control input-lg" name="captcha"id="signin-captcha"
                required="required"placeholder="验证码" >
               <div id='signin-cap-container'style="position:absolute; top:3px;left:160px;width:140px;height:40px;">
                 <img id="captcha" style="width:140px;height:40px;" />
               </div>
           </div>
         <a id='signin-gen-cap'href="javaScript:getVerify();">看不清楚？换一张</a>
-        <input type="submit" name="signin" id="signin-btn" class="btn btn-success btn-lg btn-block" style="margin-top:30px;outline:none;" value="登录">
+        <input type="submit" name="signin" id="signin-btn" class="btn btn-success btn-lg btn-block" style="margin-top:10px;outline:none;" value="登录">
           <div class="checkbox" style="display:inline-block;">
             <label>
-              <input type="checkbox" checked="checked" >
+              <input type="checkbox" checked="checked" name="rememberPwd"id="rememberPwd" value="1" >
               记住密码
             </label>
           </div>
@@ -94,6 +94,7 @@
     <script src="__PUBLIC__/js/jquery.form.js"></script>
     <script src="__PUBLIC__/plugins/bootstrap/js/bootstrap.min.js"></script>
     <script src="__ROOT__/Application/Home/View/default/js/login.js"></script>
+    <script src="__ROOT__/Application/Home/View/default/js/user.js"></script>
     <script type="text/javascript">
     $(function(){getVerify()});
     </script>

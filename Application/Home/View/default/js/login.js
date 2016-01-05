@@ -1,5 +1,13 @@
 
 $(function(){
+
+  $('#rememberPwd').change(function(){
+    if ($('#rememberPwd').val()=='1'){
+      $('#rememberPwd').val('0');
+    }else{
+      $('#rememberPwd').val('1');
+    }
+  })
   
   // jquery.form.js插件发送登录请求
   $("#signin").ajaxForm({
@@ -9,13 +17,13 @@ $(function(){
       if ( result.status > 0)
         {
           $("#error-msg").hide();
-          window.location.href = "{:U('User/index')}";
+          window.location.href = "{:U('Users/index')}";
         }
         else
         {
           $("#error-msg p").remove();
           $('#error-msg').append("<p>"+result.msg+"</p>").show();
-          genCaptcha('#signin-cap-container');
+          // genCaptcha('#signin-cap-container');
         }
     }
   });
