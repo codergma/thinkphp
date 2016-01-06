@@ -17,13 +17,13 @@ $(function(){
       if ( result.status > 0)
         {
           $("#error-msg").hide();
-          window.location.href = "{:U('Users/index')}";
+          window.location.href = window.ThinkPHP.DOMAIN+"index.php/Home/Index/index";
         }
         else
         {
           $("#error-msg p").remove();
           $('#error-msg').append("<p>"+result.msg+"</p>").show();
-          // genCaptcha('#signin-cap-container');
+          getVerify();
         }
     }
   });

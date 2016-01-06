@@ -1,3 +1,4 @@
+$(function(){
  // jquery.form.js插件发送注册请求
   $('#signup').ajaxForm({
     type:'post',
@@ -13,7 +14,21 @@
       {
           $("#error-msg p").remove();
           $('#error-msg').append("<p>"+result.msg+"</p>").show();
-          genCaptcha('#signup-cap-container');
+          getVerify();
       }
     }
   });
+})
+
+var interval_hd;
+var remain_time = 5;
+function setRemainTime(){
+    if(remain_time > 0) {
+      remain_time--;
+      $("#error-msg p").text("注册成功，"+remain_time+"s后跳转到登录页面");
+    }else{
+      window.clearInterval(interval_hd);
+      var a = window.ThinkPHP.DOMAIN;
+      window.location.href = window.ThinkPHP.DOMAIN+"index.php/Home/Users/login";
+    }
+}

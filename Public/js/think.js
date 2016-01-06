@@ -1,6 +1,5 @@
 (function($){
 
-        window.ThinkPHP = {};
         ThinkPHP.test = function (url){
                 var pattern = /(?:\d{4})-(?:\d{2}-(\d{2}))/;
                 var str = "2010-01-02 2010-01-02";
@@ -9,13 +8,13 @@
         }
         /**
          * 解析URL
-         * @param  {string} url 被解析的URL
-         * @return {object}     解析后的数据
+         * @param  string url 被解析的URL
+         * @return object     解析后的数据
          */
-         ThinkPHP.parse_url = function (url){
+         ThinkPHP.parseURL = function (url){
                 var parse = url.match(/^(?:([a-z]+):\/\/)?([\w-]+(?:\.[\w-]+)+)?(?::(\d+))?([\w-\/]+)?(?:\?((?:\w+=[^#&=\/]*)?(?:&\w+=[^#&=\/]*)*))?(?:#([\w-]+))?$/i);
-                parse || $.error("url不合法") && return null;
-                
+                parse || $.error("url不合法");
+               
                 return{
                        "scheme" : parse[1],
                        "host"   : parse[2], 
@@ -25,6 +24,7 @@
                        "fragment":parse[6]
                 };
          }
+
 
 
 })(jQuery);

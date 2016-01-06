@@ -7,17 +7,9 @@
     <title>登录</title>
     <link href="__PUBLIC__/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="__ROOT__/Application/Home/View/default/css/login.css" rel="stylesheet">
-    <script type="text/javascript">
-     window.CG = {
-      "ROOT"   : "__ROOT__",
-      "APP"    : "__APP__",
-      "PUBLIC" : "__PUBLIC__",
-      "DOMAIN" : "{:cg_domain()}",
-      "CONTROLLER":"__CONTROLLER__"
-    }
-    </script>
   </head>
   <body>
+  <include file="./Application/Home/View/default/common.html" />
   <div class="container">
     <div class="sign-page">
     	<div class="logo text-center">
@@ -90,11 +82,9 @@
     </div>
   </div>
 </div>
-    <script src="__PUBLIC__/js/jquery.min.js"></script>
     <script src="__PUBLIC__/js/jquery.form.js"></script>
-    <script src="__PUBLIC__/plugins/bootstrap/js/bootstrap.min.js"></script>
-    <script src="__ROOT__/Application/Home/View/default/js/login.js"></script>
-    <script src="__ROOT__/Application/Home/View/default/js/user.js"></script>
+    <script src="__ROOT__/Application/Home/View/default/js/users/login.js"></script>
+    <script src="__ROOT__/Application/Home/View/default/js/users/user.js"></script>
     <script type="text/javascript">
     $(function(){getVerify()});
     </script>
