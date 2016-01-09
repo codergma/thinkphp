@@ -19,7 +19,6 @@ class FaceBookModel extends Model
 	* @return bool
 	*/
 	public function login(){
-
 		$username = I('username');
 		$pass	  = I('pass');
 		if (empty($username) || empty($pass)) {
@@ -39,14 +38,14 @@ class FaceBookModel extends Model
 
 		// 必须带上这个cookie，facebook用来检测是否时通过浏览器登录的
 		$cookie = 'fb_gate=https%3A%2F%2Fwww.facebook.com%2F; _js_reg_fb_ref=https%3A%2F%2Fwww.facebook.com%2F';
-
-		$opt_login = array(
+		$cookie_file = 	CACHE_PATH.'/Cookie/'.$username;
+		$login_opts = array(
 			CURLOPT_URL 		   => 'https://www.facebook.com/login.php?login_attempt=1&lwv=110',
 			CURLOPT_POST		   => true,
 			CURLOPT_POSTFIELDS	   => $query,
 			CURLOPT_COOKIE   	   => $cookie,
 			CURLOPT_USERAGENT	   => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
-			CURLOPT_COOKIEJAR	   => $this->cookie_file,
+			CURLOPT_COOKIEJAR	   => $cookie_file,
 			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_REFERER		   => 'https://www.facebook.com/',
@@ -57,7 +56,7 @@ class FaceBookModel extends Model
 			);
 
 		$ch = curl_init();
-		curl_setopt_array($ch,$opt_login);
+		curl_setopt_array($ch,$login_opts);
 		$content = curl_exec($ch);
 		curl_close($ch);
 
@@ -68,7 +67,7 @@ class FaceBookModel extends Model
 			$data['pass']     = $pass;
 			$data['login_status']   = -1;
             //$query = "INSERT INTO __PREFIX__face_book (username,pass,login_status) VALUES ('". $data['username']."','".$data['pass']."',".$data['login_status']. ") ON DUPLICATE KEY UPDATE login_status=".$data['login_status'];
-  			$this->save($data);
+  			$this->add($data,array(),true);
 			return false;
 		}else{
 			$data = array();
@@ -76,11 +75,11 @@ class FaceBookModel extends Model
 			$data['pass']     = $pass;
 			$data['login_status']   = 1;
             //$query = "INSERT INTO __PREFIX__face_book (username,pass,login_status) VALUES ('". $data['username']."','".$data['pass']."',".$data['login_status']. ") ON DUPLICATE KEY UPDATE login_status=".$data['login_status'];
-  			$this->save($data);
+  			$this->add($data,array(),true);
   			//登录成功初始化成员变量
 			$this->username    = $username;
 			$this->curl_opts    = array(
-				CURLOPT_COOKIEFILE     => CACHE_PATH.'/Cookie/'.$username,
+				CURLOPT_COOKIEFILE     => $cookie_file, 
 				CURLOPT_USERAGENT	   => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
 				CURLOPT_SSL_VERIFYPEER => false,
 				CURLOPT_SSL_VERIFYHOST => 0,

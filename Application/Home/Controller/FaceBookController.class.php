@@ -12,16 +12,18 @@ class FaceBookController extends Controller
 	*
 	*/
 	public function run(){
-		// $rv = array('status' => 1);
-		 $m = D('FaceBook');
+		$rv = array('status' => 1);
+		$m = D('FaceBook');
 
-		// $res = $m->login();
-		// if (!$res) {
-		// 	$rv['status'] = -1;
-		// 	$rv['msg']    = '登录失败';
-		// 	die(json_encode($rv));
-		// }
+		// 1.登录
+		$res = $m->login();
+		if (!$res) {
+			$rv['status'] = -1;
+			$rv['msg']    = '登录失败';
+			die(json_encode($rv));
+		}
 
+		// 2.抓取用户信息
 		$m->captUserInfo();
 		// $res = $m->addFriends();
 
