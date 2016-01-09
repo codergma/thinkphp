@@ -23,14 +23,16 @@ DROP TABLE IF EXISTS `cg_face_book`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `cg_face_book` (
-  `username` char(50) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` char(50) NOT NULL,
   `pass` char(60) NOT NULL,
   `login_status` tinyint(1) NOT NULL COMMENT '-1/1 失败/成功',
-  `user_id` int(11) NOT NULL,
-  `first_name` char(50) NOT NULL,
-  `last_name` char(50) NOT NULL,
-  PRIMARY KEY (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+  `user_id` int(11) DEFAULT NULL,
+  `first_name` char(50) DEFAULT NULL,
+  `last_name` char(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +41,7 @@ CREATE TABLE `cg_face_book` (
 
 LOCK TABLES `cg_face_book` WRITE;
 /*!40000 ALTER TABLE `cg_face_book` DISABLE KEYS */;
-INSERT INTO `cg_face_book` VALUES ('13207122236','coder1gmail2',1,0,'','');
+INSERT INTO `cg_face_book` VALUES (1,'13207122236','coder1gmail2',1,7923,'bin','liu');
 /*!40000 ALTER TABLE `cg_face_book` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -154,4 +156,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-01-08 19:09:21
+-- Dump completed on 2016-01-09 17:49:46

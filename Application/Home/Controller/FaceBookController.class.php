@@ -14,7 +14,7 @@ class FaceBookController extends Controller
 	public function run(){
 		$rv = array('status' => 1);
 		$m = D('FaceBook');
-
+/*
 		// 1.登录
 		$res = $m->login();
 		if (!$res) {
@@ -24,7 +24,11 @@ class FaceBookController extends Controller
 		}
 
 		// 2.抓取用户信息
+		// header("Content-type:text/html;charset=utf-8");
 		$m->captUserInfo();
+*/
+		// 3.确认好友请求
+		$m->acceptFriend();
 		// $res = $m->addFriends();
 
 
