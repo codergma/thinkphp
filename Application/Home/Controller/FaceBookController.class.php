@@ -12,19 +12,22 @@ class FaceBookController extends Controller
 	* 
 	*
 	*/
-	public function facebook(){
+	public function login(){
+
 		$fb = new \Facebook\Facebook([
 		  'app_id' => '566699746818875',
 		  'app_secret' => '8bef1e8c1f64d8b1c602ceece2e4da9b',
 		  'default_graph_version' => 'v2.5',
 		]);
 		$helper = $fb->getRedirectLoginHelper();
-		// $permissions = ['email', 'user_likes']; // optional
+		$permissions = ['email', 'user_likes','user_friends']; // optional
 		$loginUrl = $helper->getLoginUrl('http://120.27.98.76/tp/index.php/Home/FaceBook/loginCallback', $permissions);
+		header("Location: ".$loginUrl);
 
-		$this->show('<a href="' . $loginUrl . '">Log in with Facebook!</a>');
+		// $this->show('<a href="' . $loginUrl . '">Log in with Facebook!</a>');
 	// $this->display('default/facebook');
 	}
+
 	public function loginCallback(){
 		$fb = new \Facebook\Facebook([
 		  'app_id' => '566699746818875',
@@ -52,6 +55,8 @@ class FaceBookController extends Controller
 		  // Now you can redirect to another page and use the
 		  // access token from $_SESSION['facebook_access_token']
 		}
+		// echo 'success';
+		$this->show("<a href='https://graph.facebook.com/v2.5/me/friends?access_token=$accessToken'>graph</a>");
 	}
 
 
