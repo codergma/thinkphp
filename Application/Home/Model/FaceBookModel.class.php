@@ -2,6 +2,7 @@
 namespace Home\Model;
 use Think\Model;
 Vendor('phpQuery',VENDOR_PATH.'phpQuery');
+Vendor('simple_html_dom',VENDOR_PATH.'simple_html_dom');
 
 
 /**
@@ -12,6 +13,7 @@ class FaceBookModel extends Model
 	public $base_url   = 'https://www.facebook.com/';
 	public $email  = null;
 	public $curl_opts = null;
+	public $profile_href = null;
 
     public function __construct(){
     	$this->email = I('email');
@@ -27,7 +29,7 @@ class FaceBookModel extends Model
 				CURLOPT_AUTOREFERER	   => true,
 				CURLOPT_CONNECTTIMEOUT => 10,
 				CURLOPT_RETURNTRANSFER => 1,
-				CURLOPT_HEADER		   => 1,
+				CURLOPT_HEADER		   => 0,
 				);
     	}
     	parent::__construct();
@@ -62,6 +64,7 @@ class FaceBookModel extends Model
 		$login_opts[CURLOPT_POST]		 = true;
 		$login_opts[CURLOPT_POSTFIELDS]	 = $query;
 		$login_opts[CURLOPT_COOKIE]   	 = $cookie;
+		$login_opts[CURLOPT_HEADER]		 = 1;
 
 		$ch = curl_init();
 		curl_setopt_array($ch,$login_opts);
@@ -91,10 +94,10 @@ class FaceBookModel extends Model
 
 
 	/**
-	* 抓取用户关键信息
+	* 抓取用户profile_href
 	* @return bool
 	*/
-	public function captUserInfo(){
+	public function catchProfileURI(){
 		$capt_opts = $this->curl_opts;
 		$capt_opts[CURLOPT_URL] =  $this->base_url;
 		$ch = curl_init();
@@ -103,21 +106,71 @@ class FaceBookModel extends Model
 		curl_close($ch);
 		// $content = file_get_contents(CACHE_PATH.'page.html');
 
-		//用户id,first_name,last_name
+		// profile_href
 		\phpQuery::newDocument($content);
-		$href = pq("div [data-click='profile_icon'] a")->attr('href');
+		$this->profile_href = pq("div [data-click='profile_icon'] a")->attr('href');
 
-		preg_match( "/https:\/\/www.facebook.com\/([\s\S]+)\.([\s\S]+)\.([0-9]+)/",$href,$matches);
-		if (empty($matches[1])) {
-			return flase;
-		}else{
-			$data = array();
-			$data['first_name']  = $matches[1];
-			$data['last_name'] = $matches[2];
-			$data['user_id']	= $matches[3];
-			$this->where('email = '.$this->email)->save($data);
-			return true;
-		}
+		$data = array();
+		$data['profile_href']  = $this->profile_href;
+		$this->where('email = '.$this->email)->save($data);
+		// preg_match( "/https:\/\/www.facebook.com\/([\s\S]+)\.([\s\S]+)\.([0-9]+)/",$href,$matches);
+		// if (empty($matches[1])) {
+		// 	return flase;
+		// }else{
+		// 	$data = array();
+		// 	$data['first_name']  = $matches[1];
+		// 	$data['last_name'] = $matches[2];
+		// 	$data['user_id']	= $matches[3];
+		// 	$this->where('email = '.$this->email)->save($data);
+		// 	return true;
+		// }
+	}
+	/**
+	* 抓取好友数量
+	*
+	*/
+	public function catchFriendsNum(){
+//		 $capt_opts = $this->curl_opts;
+//		 $capt_opts[CURLOPT_URL] =  $this->profile_href;
+//		 $ch = curl_init();
+//		 curl_setopt_array($ch, $capt_opts);
+//		 $content = curl_exec($ch);
+//		 curl_close($ch);
+        // $capt_opts = $this->curl_opts;
+        // $capt_opts[CURLOPT_URL] =  "https://www.facebook.com/bin.liu.7923";
+        // $ch = curl_init();
+        // curl_setopt_array($ch, $capt_opts);
+        // $content = curl_exec($ch);
+        // curl_close($ch);
+        // file_put_contents(CACHE_PATH.'request.html',$content);
+		
+
+		// $html = file_get_html('/home/liubin/Documents/thinkphp/Application/Runtime/Cache/request.html');
+		// $out = '';
+		// foreach($html->find('#globalContainer') as $e) 
+		//    $out .= $e ;
+		// return $out;
+
+		$content = file_get_contents(CACHE_PATH.'request.html');
+		\phpQuery::newDocumentHTML($content);
+		return $friends_num = pq("#globalContainer")->html();
+
+		// $dom = new \DOMDocument();
+		// $dom->loadHTML($content);
+		// $nodes = $dom->getElementsByTagName('a');
+		// $out = '';
+		// foreach ($nodes as $node) {
+		//     echo $out .= $node->nodeValue;
+		// }
+
+		// return $out;
+		
+		//     return $book->nodeValue;
+
+
+		$data = array();
+		$data['friends_num']  = $friends_num;
+		$this->where('email = '.$this->email)->save($data);
 	}
 
 	/**
