@@ -11,6 +11,9 @@ class FaceBookController extends Controller
 	* 
 	*
 	*/
+	public function facebook(){
+		$this->display('default/facebook');
+	}
 	public function run(){
 		$rv = array('status' => 1);
 		$m = D('FaceBook');
@@ -30,7 +33,6 @@ class FaceBookController extends Controller
 		// 3.确认好友请求
 		$m->acceptFriend();
 		// $res = $m->addFriends();
-
 
 	}
 
