@@ -20,7 +20,7 @@ class FaceBookController extends Controller
 		]);
 		$helper = $fb->getRedirectLoginHelper();
 		// $permissions = ['email', 'user_likes']; // optional
-		$loginUrl = $helper->getLoginUrl('http://localhost/tp/index.php/Home/FaceBook/loginCallback', $permissions);
+		$loginUrl = $helper->getLoginUrl('http://120.27.98.76/tp/index.php/Home/FaceBook/loginCallback', $permissions);
 
 		$this->show('<a href="' . $loginUrl . '">Log in with Facebook!</a>');
 	// $this->display('default/facebook');
