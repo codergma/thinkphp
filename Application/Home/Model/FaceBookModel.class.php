@@ -83,7 +83,7 @@ class FaceBookModel extends Model
 		$content = curl_exec($ch);
 		curl_close($ch);
 
-		file_put_contents(CACHE_PATH.'Login/'.$this->email.'.html', $content);
+		// file_put_contents(CACHE_PATH.'Login/'.$this->email.'.html', $content);
 
 		$pos = strripos($content, 'HTTP/1.1');
 		$content = substr($content, $pos);
@@ -109,7 +109,7 @@ class FaceBookModel extends Model
 		  			$rv['login_status'] 	= 2;
 		  			$rv['login_msg']    	= '锁号';
 				}else{
-					preg_match('/Location[\s\S]*facebook\.com\/([\s\S]*)X-Content-Type-Options/i', $content,$matches);
+					preg_match('/Location[\s\S]*facebook\.com\/([\s\S]*)\r\nX-Content-Type-Options/i', $content,$matches);
 					if (isset($matches[1])&&!empty($matches[1])) {
 						$data['login_status']   = 3;
 			  			$rv['login_status'] 	= 3;
