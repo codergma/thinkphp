@@ -49,7 +49,7 @@ class FaceBookModel extends Model
 	* 模拟登录
 	* @param string 
 	* @param string 
-	* @return array
+	* @return array -1/1/2/3/4/5 登录失败/成功/旧密码/验证邮箱/锁号/未知错误
 	*/
 	public function login(){
 		$rv['login_status'] = 1;
