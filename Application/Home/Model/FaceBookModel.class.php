@@ -13,8 +13,10 @@ class FaceBookModel extends Model
 {
 	public $base_url   = 'https://www.facebook.com/';
 	public $email  = null;
+	public $pass   = null;
 	public $curl_opts = null;
 	public $profile_href = null;
+	public $cookie_file = null;
 
 	/**
 	* 构造函数
@@ -22,11 +24,11 @@ class FaceBookModel extends Model
 	*/
     public function __construct(){
     	$this->email = I('email');
-        $cookie_file = CACHE_PATH.'/Cookie/'.$this->email;
+    	$this->pass  = I('pass');
+        $this->cookie_file = CACHE_PATH.'/Cookie/'.$this->email;
 
 		$this->curl_opts    = array(
-			CURLOPT_COOKIEJAR      => $cookie_file,
-			CURLOPT_COOKIEFILE     => $cookie_file,
+			CURLOPT_COOKIEJAR      => $this->cookie_file,
 			CURLOPT_USERAGENT	   => 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36',
 			CURLOPT_SSL_VERIFYPEER => false,
 			CURLOPT_SSL_VERIFYHOST => 0,
@@ -131,6 +133,7 @@ class FaceBookModel extends Model
 				break;
 		}
 
+		$this->curl_opts[CURLOPT_COOKIEFILE] =  $this->cookie_file;
 		return $rv;
 	}
 	

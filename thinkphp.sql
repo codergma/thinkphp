@@ -32,9 +32,10 @@ CREATE TABLE `cg_face_book` (
   `last_name` char(50) DEFAULT NULL,
   `profile_href` char(50) DEFAULT NULL,
   `friends_num` int(11) NOT NULL,
+  `birthday` char(50) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -43,7 +44,7 @@ CREATE TABLE `cg_face_book` (
 
 LOCK TABLES `cg_face_book` WRITE;
 /*!40000 ALTER TABLE `cg_face_book` DISABLE KEYS */;
-INSERT INTO `cg_face_book` VALUES (17,'13207122236','coder1gmail3',1,NULL,NULL,NULL,'https://www.facebook.com/bin.liu.7923',0);
+INSERT INTO `cg_face_book` VALUES (68,'hzchjz@163.com','wxy123',-1,NULL,NULL,NULL,NULL,0,NULL),(69,'jefflixing@hotmail.com','19820302li',1,NULL,NULL,NULL,NULL,0,NULL),(71,'13207122236','coder1gmail3',1,NULL,NULL,NULL,'https://www.facebook.com/bin.liu.7923',22,'1998年2月19日'),(72,'sksdyd123456@naver.com','as258963',3,NULL,NULL,NULL,NULL,0,NULL);
 /*!40000 ALTER TABLE `cg_face_book` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -158,4 +159,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2016-01-11 11:05:50
+-- Dump completed on 2016-01-12 15:19:36
