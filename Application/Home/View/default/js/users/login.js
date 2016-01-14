@@ -8,7 +8,6 @@ $(function(){
       $('#rememberPwd').val('1');
     }
   })
-  
   // jquery.form.js插件发送登录请求
   $("#signin").ajaxForm({
     type:'post',

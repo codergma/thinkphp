@@ -23,6 +23,8 @@ class UsersController extends Controller
 		if(is_login()){
 			$this->redirect("Index/index");
 		}
+		$data['title'] = '登录';
+		$this->assign($data);
 		$this->display('default/login');
 	}
 
@@ -31,6 +33,8 @@ class UsersController extends Controller
 	*
 	*/
 	public function register(){
+		$data['title'] = '注册';
+		$this->assign($data);
 		$this->display('default/register');
 	}
 
@@ -81,6 +85,15 @@ class UsersController extends Controller
 		}
 
 		die(json_encode($rv));
+	}
+
+	/**
+	* 用户退出
+	*
+	*/
+	public function logout(){
+		session('[destroy]');
+		return 1;
 	}
 
 	/**

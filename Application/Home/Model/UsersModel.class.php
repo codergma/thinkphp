@@ -45,13 +45,12 @@ class UsersModel extends Model
 			$data['login_ip'] = get_client_ip();
 			M('log_user_logins')->add($data);
 		}
-		$data = array();
-		$data['user_id'] = $rs['user_id'];
-		$data['user_name']= $login_name;
-		$session_flag = C('SESSION_FLAG');
 		$expire = C('COOKIE_EXPIRE');
+		// session初始化设置
 		session(array('expire'=>$expire));
-		session($session_flag,$data);
+		// session赋值
+		session('user_id',$rs['user_id']);
+		session('user_name', $login_name);
 		if ($rememberPwd == '1') {
 			$expire = time() + C('COOKIE_EXPIRE');
 		}else{

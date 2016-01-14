@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>登录</title>
-    <link href="__PUBLIC__/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="__ROOT__/Application/Home/View/default/css/login.css" rel="stylesheet">
+   <include file="./Application/Home/View/default/head_common.html"/>
   </head>
   <body>
-  <include file="./Application/Home/View/default/common.html" />
   <div class="container">
     <div class="sign-page">
     	<div class="logo text-center">
@@ -53,7 +47,7 @@
               </div>
           </div>
         <a id='signin-gen-cap'href="javaScript:getVerify();">看不清楚？换一张</a>
-        <input type="submit" name="signin" id="signin-btn" class="btn btn-success btn-lg btn-block" style="margin-top:10px;outline:none;" value="登录">
+        <input type="submit" name="signin" id="signinBtn" class="btn btn-success btn-lg btn-block" style="margin-top:10px;outline:none;" value="登录">
           <div class="checkbox" style="display:inline-block;">
             <label>
               <input type="checkbox" checked="checked" name="rememberPwd"id="rememberPwd" value="1" >
@@ -82,11 +76,13 @@
     </div>
   </div>
 </div>
-    <script src="__PUBLIC__/js/jquery.form.js"></script>
-    <script src="__ROOT__/Application/Home/View/default/js/users/login.js"></script>
-    <script src="__ROOT__/Application/Home/View/default/js/users/user.js"></script>
-    <script type="text/javascript">
-    $(function(){getVerify()});
-    </script>
+<script src="__PUBLIC__/js/jquery.form.js"></script>
+<script src="__ROOT__/Application/Home/View/default/js/users/login.js"></script>
+<script src="__ROOT__/Application/Home/View/default/js/users/user.js"></script>
+<script type="text/javascript">
+$(function(){
+  $(function(){getVerify()});
+});
+</script>
   </body>
 </html>

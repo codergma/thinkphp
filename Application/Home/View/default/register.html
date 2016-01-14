@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>注册</title>
-    <link href="__PUBLIC__/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="__ROOT__/Application/Home/View/default/css/login.css" rel="stylesheet">
+   <include file="./Application/Home/View/default/head_common.html"/>
 </head>
 <body>
-  <include file="./Application/Home/View/default/common.html" />
   <div class="container">
     <div class="sign-page">
     	<div class="logo text-center">
@@ -88,7 +82,9 @@
 <script src="__ROOT__/Application/Home/View/default/js/users/user.js"></script>
 <script src="__ROOT__/Application/Home/View/default/js/users/register.js"></script>
 <script type="text/javascript">
-$(function(){getVerify()});
+$(function(){
+  $(function(){getVerify()});
+});
 </script>
 
 </body>
