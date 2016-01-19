@@ -9,8 +9,12 @@ use Think\Controller;
 class ChatController extends Controller
 {
 	public function chat(){
-		// $this->show('<p>hello chat</p>');
 		$data = array();
+		if(is_login()){
+			$uesr_info = get_userinfo();
+			$data['user_name'] = $uesr_info['user_name'];
+			$data['user_id'] = $uesr_info['user_id'];
+		}
 		$data['title'] = '聊天';
 		$this->assign($data);
 		$this->display('default/chat');

@@ -1,8 +1,4 @@
-$(function(){
-  //加载模态框
-  appendModal();
-  getVerify();
-
+ $(function(){
   $('#rememberPwd').change(function(){
     if ($('#rememberPwd').val()=='1'){
       $('#rememberPwd').val('0');
@@ -18,7 +14,7 @@ $(function(){
       if ( result.status > 0)
         {
           $("#error-msg").hide();
-          window.location.href = window.ThinkPHP.DOMAIN+"index.php/Home/Index/index";
+          window.location.reload();
         }
         else
         {
@@ -46,7 +42,7 @@ $(function(){
       }
     });
   });
-});
+}) ;
 
 function appendModal(){
 	$("body").append(
@@ -99,15 +95,18 @@ function appendModal(){
         '</div>'+
       '</div> ');
 }
-
 //获取验证码
 function getVerify()
 {
-  var url = window.ThinkPHP.APP + '/Home/Users/getVerify';
+  var rand = Math.random();
+  var url = window.ThinkPHP.APP + '/Home/Users/getVerify/'+rand;
   $('#captcha').attr('src',url);
 }
 // 显示模态窗口
 function showLoginModal(){
+  //加载模态框
+  appendModal();
+  getVerify();
   $('#loginModal').modal('show');
 }
 // 用户退出
@@ -116,7 +115,7 @@ function logout(){
         url:window.ThinkPHP.APP+'/Home/Users/logout',
         method:'post',
         success:function(){
-          window.location.reload();
+          window.location.href = window.ThinkPHP.APP+"/Home/Users/login";
         }
       }
     );
