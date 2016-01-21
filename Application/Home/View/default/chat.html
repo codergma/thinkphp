@@ -11,18 +11,19 @@
 	    <div class="row clearfix">
 	        <div class="col-md-1 column">
 	        </div>
-	        <div class="col-md-6 column">
-	           <div class="thumbnail">
-	               <div class="caption" id="dialog"></div>
+	        <div class="col-md-6 column" >
+	           <div class="thumbnail" >
+	               <div class="caption" id="dialog"style="height:400px; overflow:auto">
+		               <div id="user_name" style="width:50px;margin:0 auto;font-weight:bold;value=all">all</div>
+	               </div>
 	           </div>
-	           <form onsubmit="onSubmit(); return false;">
-	                <select style="margin-bottom:8px" id="client_list">
+	           <form onsubmit="onSubmit(); return false;" style="margin-bottom:50px;">
+	                <select style="margin-bottom:8px;display:none;" id="client_list" >
                         <option value="all">所有人</option>
                     </select>
                     <textarea class="textarea thumbnail" id="textarea"></textarea>
                     <div class="say-btn"><input type="submit" class="btn btn-default" value="发表" /></div>
                </form>
-               <p class="cp">PHP多进程+Websocket(HTML5/Flash)+PHP Socket实时推送技术&nbsp;&nbsp;&nbsp;&nbsp;Powered by <a href="http://www.workerman.net/workerman-chat" target="_blank">workerman-chat</a></p>
 	        </div>
 	        <div class="col-md-3 column">
 	           <div class="thumbnail">
@@ -93,7 +94,7 @@
 	            // 登录 更新用户列表
 	            case 'login':
 	                //{"type":"login","client_id":xxx,"client_name":"xxx","client_list":"[...]","time":"xxx"}
-	                say(data['client_id'], data['client_name'],  data['client_name']+' 加入了聊天室', data['time']);
+	                // say(data['client_id'], data['client_name'],  data['client_name']+' 加入了聊天室', data['time']);
 	                if(data['client_list'])
 	                {
 	                    client_list = data['client_list'];
@@ -113,9 +114,15 @@
 	            // 用户退出 更新用户列表
 	            case 'logout':
 	                //{"type":"logout","client_id":xxx,"time":"xxx"}
-	                say(data['from_client_id'], data['from_client_name'], data['from_client_name']+' 退出了', data['time']);
+	                // say(data['from_client_id'], data['from_client_name'], data['from_client_name']+' 退出了', data['time']);
 	                delete client_list[data['from_client_id']];
 	                flush_client_list();
+	                break;
+	            case 'error':
+	                //{"type":"error","client_id":xxx,"client_name":"xxx","client_list":"[...]","time":"xxx"}
+	                alert('该账户已经登录聊天室，退出后方可登录');
+	                break;
+
 	        }
 	    }
 
@@ -133,8 +140,6 @@
 	    // 提交对话
 	    function onSubmit() {
 	      var input = document.getElementById("textarea");
-	      var to_client_id = $("#client_list option:selected").attr("value");
-	      var to_client_name = $("#client_list option:selected").text();
 	      ws.send('{"type":"say","to_client_id":"'+to_client_id+'","to_client_name":"'+to_client_name+'","content":"'+input.value.replace(/"/g, '\\"').replace(/\n/g,'\\n').replace(/\r/g, '\\r')+'"}');
 	      input.value = "";
 	      input.focus();
@@ -148,9 +153,10 @@
 	    	client_list_slelect.empty();
 	    	userlist_window.append('<h4>在线用户</h4><ul>');
 	    	client_list_slelect.append('<option value="all" id="cli_all">所有人</option>');
+	    	userlist_window.append('<li id="all"><img src="http://lorempixel.com/18/18/?'+Math.random()+'" style="width:18px;height:18px;" /> '+'<a href="javascript:void(0);" onclick="chatWith(this);">all</a></li>');
 	    	for(var p in client_list){
-	            userlist_window.append('<li id="'+p+'">'+client_list[p]+'</li>');
-	            client_list_slelect.append('<option value="'+p+'">'+client_list[p]+'</option>');
+	            userlist_window.append('<li id="'+p+'"><img src="http://lorempixel.com/18/18/?'+Math.random()+'" style="width:18px;height:18px;" /> '+'<a href="javascript:void(0);" onclick="chatWith(this);">'+client_list[p]+'</a></li>');
+	            // client_list_slelect.append('<option value="'+p+'">'+client_list[p]+'</option>');
 	        }
 	    	$("#client_list").val(select_client_id);
 	    	userlist_window.append('</ul>');
@@ -159,13 +165,17 @@
 	    // 发言
 	    function say(from_client_id, from_client_name, content, time){
 	    	$("#dialog").append('<div class="speech_item"><img src="http://lorempixel.com/38/38/?'+from_client_id+'" class="user_icon" /> '+from_client_name+' <br> '+time+'<div style="clear:both;"></div><p class="triangle-isosceles top">'+content+'</p> </div>');
-	    }
-
+	    	$("#dialog").scrollTop(100000);
+		}
+		function chatWith(obj){
+			to_client_name = $(obj).text();
+			to_client_id   = $(obj).parent().attr("id");
+			var html = '<div id="user_name" style="width:50px;margin:0 auto;font-weight:bold;"'+'value='+to_client_id+'>'+to_client_name+'</div>';
+			$("#dialog").html(html);
+		}
 	    $(function(){
-	    	select_client_id = 'all';
-		    $("#client_list").change(function(){
-		         select_client_id = $("#client_list option:selected").attr("value");
-		    });
+	    	to_client_name = 'all';
+	    	to_client_id = 'all';
 	    });
   	</script>
 </body>

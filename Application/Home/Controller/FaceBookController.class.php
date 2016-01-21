@@ -27,6 +27,7 @@ class FaceBookController extends Controller
 		if($res['login_status'] != 1){
 			die(json_encode($rv));
 		}
+		/*
 		// 2.抓取主页　url
 		$url = $m->catchProfileURI();
 		if ($url === false) {
@@ -38,6 +39,10 @@ class FaceBookController extends Controller
 
 		// 4.抓取生日
 		$rv['birthday'] = $m->catchBirthday();
+		*/
+
+		// 5.修改密码
+		die(json_encode($m->modifyPass()));
 
 		die(json_encode($rv));
 	}
