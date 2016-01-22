@@ -17,6 +17,7 @@ class FaceBookModel extends Model
 	public $curl_opts = null;
 	public $profile_href = null;
 	public $cookie_file = null;
+	public $user_id = null;
 
 	/**
 	* 构造函数
@@ -140,21 +141,24 @@ class FaceBookModel extends Model
 	
 
 	/**
-	* 抓取用户profile_href
+	* 抓取用户profile_href,user_id
 	* @return string/bool
 	*/
-	public function catchProfileURI(){
+	public function catchUserInfo(){
 		$capt_opts = $this->curl_opts;
 		$capt_opts[CURLOPT_URL] =  $this->base_url;
 		$ch = curl_init();
 		curl_setopt_array($ch, $capt_opts);
 		$content = curl_exec($ch);
 		curl_close($ch);
-		// $content = file_get_contents(CACHE_PATH.'page.html');
 
 		// profile_href
 		\phpQuery::newDocument($content);
 		$this->profile_href = pq("div [data-click='profile_icon'] a")->attr('href');
+
+		// user_id
+		preg_match('/{"USER_ID":"([\s\S]*)",/iU', $content,$matches);
+		$this->user_id =  $matches[1];
 
 		if(empty($this->profile_href)){
 			return false;
@@ -164,17 +168,7 @@ class FaceBookModel extends Model
 			$this->where("`email` = '".$this->email."'")->save($data);
 			return $this->profile_href;
 		}
-		// preg_match( "/https:\/\/www.facebook.com\/([\s\S]+)\.([\s\S]+)\.([0-9]+)/",$href,$matches);
-		// if (empty($matches[1])) {
-		// 	return flase;
-		// }else{
-		// 	$data = array();
-		// 	$data['first_name']  = $matches[1];
-		// 	$data['last_name'] = $matches[2];
-		// 	$data['user_id']	= $matches[3];
-		// 	$this->where('email = '.$this->email)->save($data);
-		// 	return true;
-		// }
+
 	}
 	
 	/**
@@ -243,6 +237,7 @@ class FaceBookModel extends Model
 	* 
 	*/
 	public function modifyPass(){
+		// 抓取必要信息
 		$capt_opts = $this->curl_opts;
 		$capt_opts[CURLOPT_URL] =  $this->base_url.'settings?tab=account&section=email&view';
 		$capt_opts[CURLOPT_HEADER] = 1;
@@ -254,20 +249,19 @@ class FaceBookModel extends Model
 		file_put_contents(CACHE_PATH.'modifyPass.html', $content);
 		$content = str_replace("<!--", "", $content);
 		$content = str_replace("-->", "", $content);
+		
 		\phpQuery::newDocumentHTML($content);
 		$fb_dtsg = pq("input[name=fb_dtsg]")->val();
-		file_put_contents(CACHE_PATH.'modifyPass.html', $content); 
-		preg_match('/{"USER_ID":"([\s\S]*)",/iU', $content,$matches);
-		$user_id =  $matches[1];
 
 
+		// 发送修改密码请求
 		$query = array(
 			'fb_dtsg'=>$fb_dtsg,
 			'password_strength'=>'2',
 			'password_old'=>$this->pass,
 			'password_new'=>$this->oldpass,
 			'password_confirm'=>$this->oldpass,
-			'__user' => $user_id,
+			'__user' => $this->user_id,
 			);
 		$capt_opts = array();
 		$capt_opts = $this->curl_opts;
@@ -282,6 +276,107 @@ class FaceBookModel extends Model
 		curl_close($ch);
 		file_put_contents(CACHE_PATH.'modifyPass.html', $content); 
 	}
+
+	/**
+	* 抓取好友
+	*
+	*/
+	public function addFriends(){
+		// 抓取我的好友页面
+		$capt_opts = $this->curl_opts;
+		$capt_opts[CURLOPT_URL] = $this->profile_href.'/friends';
+		$ch = curl_init();
+		curl_setopt_array($ch, $capt_opts);
+		$content = curl_exec($ch);
+		curl_close($ch);
+		file_put_contents(CACHE_PATH.'addFriends.html', $content);
+
+		// 处理内容
+		$content = preg_replace("/<code[\s\S]*><!--/iU", "", $content);
+		$content = preg_replace("/--><\/code>/iU", "", $content);
+		file_put_contents(CACHE_PATH.'addFriends.html', $content);
+		// 分析html,获取好友的好友链接
+		\phpQuery::newDocumentHTML($content);
+		$friends_url = array();
+		foreach (pq("a._39g5") as $value) {
+			$href = pq($value)->attr("href");
+			if(stripos($href,'www')){
+	            $friends_url[] = $href;
+			}
+
+//			$text = pq($value)->text();
+//			preg_match("/[0-9|,]", $text,$matches);
+//			if ($matches[0] > 100) {
+//				$friends_url = pq($value)->attr("href");
+//				break;
+//			}
+		}
+
+
+		foreach ($friends_url as $url) {
+			// 抓取好友的好友页面
+			$capt_opts[CURLOPT_URL] = $url;
+			$ch = curl_init();
+			curl_setopt_array($ch, $capt_opts);
+			$content =  curl_exec($ch);
+			curl_close($ch);
+
+			// 处理内容
+			$content = preg_replace("/<code[\s\S]*><!--/iU", "", $content);
+			$content = preg_replace("/--><\/code>/iU", "", $content);
+			// file_put_contents(CACHE_PATH.'addFriends_all_third.html',$content);
+			// $content = file_get_contents(CACHE_PATH.'addFriends_all_third.html');
+
+			// 分析html,获取添加好友需要的数据
+			\phpQuery::newDocumentHTML($content);
+			$pagelet_timeline_main_column = pq("#pagelet_timeline_main_column")->attr("data-gt");
+	        $pagelet_timeline_main_column = json_decode($pagelet_timeline_main_column);
+	        $profile_owner = $pagelet_timeline_main_column->profile_owner;
+
+			foreach (pq("div.fsl.fwb.fcb > a") as $value) {
+				$data_hovercard = pq($value)->attr("data-hovercard");
+				$data_gt = pq($value)->attr("data-gt");
+				$data_gt = json_decode($data_gt);
+				preg_match("/\?id=([0-9]*)&/iU", $data_hovercard,$matches);
+				$to_friend = $matches[1];
+
+				// 发送好友请求
+				$query = array(
+					"to_friend"=>$to_friend,
+					"action"=>"add_friend",
+					"how_found"=>"profile_friends",
+					"ref_param"=>"pb_friends_tl",
+					"link_data[gt][coeff2_registry_key]"=>$data_gt->coeff2_registry_key,
+					"link_data[gt][coeff2_info]"=>$data_gt->coeff2_info,
+					"link_data[gt][coeff2_action]"=>$data_gt->coeff2_action,
+					"link_data[gt][coeff2_pv_signature]"=>$data_gt->coeff2_pv_signature,
+					"link_data[gt][profile_owner]"=>$profile_owner,
+					"no_flyout_on_click"=>"true",
+					"floc"=>"friends_tab",
+					"__user"=>$this->user_id,
+					"__a"=>"1",
+					// "__dyn"=>"7AmajEzUGBwzgDxyG9gigmzFEbEKA8Ay8Z9LFwxBxCbzES2N6xybxu3efy88awFUgx-y28y2GCEWfybDG4Upwzx2bwh9UK2uUjBGp3obe78",
+					// "__req"=>"4",
+					// "fb_dtsg"=>"AQHcchYCVC9N",
+					// "ttstamp"=>"26581729999104896786675778",
+					// "__rev"=>"2141016"
+					);
+				$capt_opts[CURLOPT_URL] = "https://www.facebook.com/ajax/add_friend/action.php?__pc=EXP1%3ADEFAULT";
+				$capt_opts[CURLOPT_POST] = true;
+				$capt_opts[CURLOPT_POSTFIELDS] = $query;
+				$ch = curl_init();
+				curl_setopt_array($ch, $capt_opts);
+				$content =  curl_exec($ch);
+				curl_close($ch);
+			}
+
+
+			
+		}
+
+	}
+
+
 	
 
 }

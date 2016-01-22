@@ -20,6 +20,7 @@ class FaceBookController extends Controller
 			'friend_num' => null,
 			'birthday'   => null,
 			);
+		// header("content-type:text/html;charset=urf-8;");
 
 		// 1.登录
 		$res = $m->login();
@@ -27,22 +28,27 @@ class FaceBookController extends Controller
 		if($res['login_status'] != 1){
 			die(json_encode($rv));
 		}
-		/*
+		
 		// 2.抓取主页　url
-		$url = $m->catchProfileURI();
+		$url = $m->catchUserInfo();
 		if ($url === false) {
 			die(json_encode($rv));
 		}
+		/*
 
 		// 3.抓取好友数量
 		$rv['friend_num']= $m->catchFriendsNum();
 
 		// 4.抓取生日
 		$rv['birthday'] = $m->catchBirthday();
-		*/
 
 		// 5.修改密码
-		die(json_encode($m->modifyPass()));
+		$m->modifyPass();
+		*/
+
+		// 6.添加好友
+		die(json_encode($m->addFriends()));
+
 
 		die(json_encode($rv));
 	}
