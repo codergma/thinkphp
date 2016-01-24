@@ -29,7 +29,7 @@ class FaceBookController extends Controller
 			die(json_encode($rv));
 		}
 		
-		// 2.抓取主页　url
+		// 2.抓取必要信息
 		$url = $m->catchUserInfo();
 		if ($url === false) {
 			die(json_encode($rv));
@@ -44,11 +44,13 @@ class FaceBookController extends Controller
 
 		// 5.修改密码
 		$m->modifyPass();
-		*/
 
 		// 6.添加好友
-		die(json_encode($m->addFriends()));
+		$m->addFriends();
+		*/
 
+        // 7.确认好友请求
+        $m->acceptFriend();
 
 		die(json_encode($rv));
 	}

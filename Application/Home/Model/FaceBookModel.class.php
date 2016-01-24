@@ -3,6 +3,8 @@ namespace Home\Model;
 use Think\Model;
 Vendor('phpQuery',VENDOR_PATH.'phpQuery');
 Vendor('simple_html_dom',VENDOR_PATH.'simple_html_dom');
+Vendor('RollingCurl',VENDOR_PATH.'rolling-curl');
+Vendor('RollingCurlGroup',VENDOR_PATH.'rolling-curl');
 
 
 /**
@@ -18,6 +20,8 @@ class FaceBookModel extends Model
 	public $profile_href = null;
 	public $cookie_file = null;
 	public $user_id = null;
+	public $token   = null;
+	public $version = null;
 
 	/**
 	* 构造函数
@@ -141,7 +145,7 @@ class FaceBookModel extends Model
 	
 
 	/**
-	* 抓取用户profile_href,user_id
+	* 抓取用户profile_href,user_id,token,vesion
 	* @return string/bool
 	*/
 	public function catchUserInfo(){
@@ -155,10 +159,15 @@ class FaceBookModel extends Model
 		// profile_href
 		\phpQuery::newDocument($content);
 		$this->profile_href = pq("div [data-click='profile_icon'] a")->attr('href');
-
 		// user_id
 		preg_match('/{"USER_ID":"([\s\S]*)",/iU', $content,$matches);
 		$this->user_id =  $matches[1];
+		// token
+		preg_match('/{"token":"([\s\S]*)"}/iU', $content,$matches);
+		$this->token = $matches[1];
+		// version
+		preg_match('/{"version":"([\s\S]*);/iU', $content,$matches);
+		$this->version = $matches[1];
 
 		if(empty($this->profile_href)){
 			return false;
@@ -224,12 +233,71 @@ class FaceBookModel extends Model
 	*/
 	public function acceptFriend(){
 		$capt_opts = $this->curl_opts;
-		$capt_opts[CURLOPT_URL] =  $this->base_url.'friends/requests/?fcref=jwl';
+		$capt_opts[CURLOPT_URL] =  $this->base_url."/ajax/requests/loader/?__pc=EXP1%3ADEFAULT";
+		$query = array(
+			"log_impressions"=>true,
+			"__user"=>$this->user_id,
+			"__a"=>"1",
+			// "__dyn"=>"7AmajEzUGBym5Q9UoGya4A5ER6yUmyUyGiyEyut9LFwxBxC9V8C3F6y8-bxu3efwFG2Dy9A7W88y8aJxafSiVWxeUlwzx2bwYDDBBwDK4VqCgS2PxO",
+			// "__req"=>"h",
+			"fb_dtsg"=>$this->token,
+			// "ttstamp":26581701011128256497811410988,
+			"__rev"=>$this->version
+			);
+		$capt_opts[CURLOPT_POST] = true;
+		$capt_opts[CURLOPT_POSTFIELDS] = $query;
 		$ch = curl_init();
 		curl_setopt_array($ch, $capt_opts);
 		$content = curl_exec($ch);
 		curl_close($ch);
-		file_put_contents(CACHE_PATH.'request.html', $content);
+        file_put_contents(CACHE_PATH.'accept.html', $content);
+        $content = str_replace('<!--', '', $content);
+        $content = str_replace('-->',  '', $content);
+
+        $pos = stripos($content, "fbRequestList hasPYMK");
+        if (!$pos) {
+        	return;
+        }
+
+		$capt_opts = $this->curl_opts;
+		$url =  $this->base_url.'/ajax/reqs.php?__pc=EXP1%3ADEFAULT';
+		$capt_opts[CURLOPT_POST] = true;
+		preg_match_all("/class=\\\\\"objectListItem\\\\\" id=\\\\\"([\s\S]*)_1_req/iU", $content,$matches);
+		$confirm = $matches[1];
+
+        
+        foreach ($confirm as $value) {
+        	$query = array(
+			"fb_dtsg"=>$this->token,
+			"confirm"=>$value,
+			"type"=>"friend_connect",
+			"request_id"=>$value,
+			"list_item_id"=>$value."_1_req",
+			"status_div_id"=>$value."_1_req_status",
+			"inline"=>"1",
+			"ref"=>"jewel",
+			"ego_log"=>"",
+			"actions[accept]"=>"1",
+			"nctr[_mod]"=>"pagelet_bluebar",
+			"__user"=>$this->user_id,
+			"__a"=>"1",
+			// "__dyn"=>"7AmajEzUGBym5Q9UoGya4A5ER6yUmyUyGiyEyut9LFwxBxC9V8CdwIhEyfyUnwPzUaqwFUyp1-y28y2HoizZAKuEjK5o8UgyUf9VVpo9XxemFAdwIUsw",
+			// "__req"=>"z",
+			// "ttstamp"=>"26581701011128256497811410988",
+			"__rev"=>$this->version,
+			);
+			$capt_opts[CURLOPT_POSTFIELDS] = $query;
+
+			$request = new \RollingCurlRequest($url);
+			$request->options = $capt_opts; 
+			$requests[] = $request;
+        }
+		$rc = new \RollingCurl();
+		$rc->window_size = 20;
+		foreach ($requests as $value) {
+			$rc->add($value);
+		}
+		$rc->execute();
 	}
 
 	/**
@@ -282,6 +350,15 @@ class FaceBookModel extends Model
 	*
 	*/
 	public function addFriends(){
+		$friends_url = $this->catchFriendsHrefs();
+		$this->catchAndSend($friends_url);
+	}
+
+	/**
+	* 抓取我的好友页面的好友链接
+	*
+	*/
+	private function catchFriendsHrefs(){
 		// 抓取我的好友页面
 		$capt_opts = $this->curl_opts;
 		$capt_opts[CURLOPT_URL] = $this->profile_href.'/friends';
@@ -303,37 +380,51 @@ class FaceBookModel extends Model
 			if(stripos($href,'www')){
 	            $friends_url[] = $href;
 			}
-
-//			$text = pq($value)->text();
-//			preg_match("/[0-9|,]", $text,$matches);
-//			if ($matches[0] > 100) {
-//				$friends_url = pq($value)->attr("href");
-//				break;
-//			}
 		}
+		return $friends_url;
+	}
 
-
+	/**
+	* 抓取好友的好友页面的好友信息,并发送添加好友请求
+	* @param  array $friends_url 
+	*/
+	private function catchAndSend($friends_url){
+		$requests = array();
 		foreach ($friends_url as $url) {
 			// 抓取好友的好友页面
-			$capt_opts[CURLOPT_URL] = $url;
-			$ch = curl_init();
-			curl_setopt_array($ch, $capt_opts);
-			$content =  curl_exec($ch);
-			curl_close($ch);
+			$capt_opts = $this->curl_opts;
+			// $ch = curl_init();
+			// curl_setopt_array($ch, $capt_opts);
+			// $content =  curl_exec($ch);
+			// curl_close($ch);
+			$request = new \RollingCurlRequest($url);
+			$request->options = $capt_opts; 
+			$requests[] = $request;
+		}
+		$rc = new \RollingCurl("$this->sendRequestCallBack");
+		$rc->window_size = 20;
+		foreach ($requests as $value) {
+			$rc->add($value);
+		}
+		$rc->execute();
+	}
 
+	private function sendRequestCallBack($response, $info=''){
 			// 处理内容
-			$content = preg_replace("/<code[\s\S]*><!--/iU", "", $content);
-			$content = preg_replace("/--><\/code>/iU", "", $content);
+			$response = preg_replace("/<code[\s\S]*><!--/iU", "", $response);
+			$response = preg_replace("/--><\/code>/iU", "", $response);
 			// file_put_contents(CACHE_PATH.'addFriends_all_third.html',$content);
 			// $content = file_get_contents(CACHE_PATH.'addFriends_all_third.html');
 
 			// 分析html,获取添加好友需要的数据
-			\phpQuery::newDocumentHTML($content);
+			\phpQuery::newDocumentHTML($response);
 			$pagelet_timeline_main_column = pq("#pagelet_timeline_main_column")->attr("data-gt");
 	        $pagelet_timeline_main_column = json_decode($pagelet_timeline_main_column);
 	        $profile_owner = $pagelet_timeline_main_column->profile_owner;
 
+	        $requests = array();
 			foreach (pq("div.fsl.fwb.fcb > a") as $value) {
+				
 				$data_hovercard = pq($value)->attr("data-hovercard");
 				$data_gt = pq($value)->attr("data-gt");
 				$data_gt = json_decode($data_gt);
@@ -351,28 +442,36 @@ class FaceBookModel extends Model
 					"link_data[gt][coeff2_action]"=>$data_gt->coeff2_action,
 					"link_data[gt][coeff2_pv_signature]"=>$data_gt->coeff2_pv_signature,
 					"link_data[gt][profile_owner]"=>$profile_owner,
+					"link_data[gt][ref]"=>"timeline:timeline",
+					"outgoing_id"=>'',
+					"logging_location"=>'',			
 					"no_flyout_on_click"=>"true",
+					"ego_log_data"=>'',
+					"http_referer"=>'',
 					"floc"=>"friends_tab",
 					"__user"=>$this->user_id,
 					"__a"=>"1",
 					// "__dyn"=>"7AmajEzUGBwzgDxyG9gigmzFEbEKA8Ay8Z9LFwxBxCbzES2N6xybxu3efy88awFUgx-y28y2GCEWfybDG4Upwzx2bwh9UK2uUjBGp3obe78",
 					// "__req"=>"4",
-					// "fb_dtsg"=>"AQHcchYCVC9N",
+					"fb_dtsg"=>$this->token,
 					// "ttstamp"=>"26581729999104896786675778",
-					// "__rev"=>"2141016"
+					"__rev"=>$this->version
 					);
-				$capt_opts[CURLOPT_URL] = "https://www.facebook.com/ajax/add_friend/action.php?__pc=EXP1%3ADEFAULT";
+				$capt_opts = $this->curl_opts;
+				$url = "https://www.facebook.com/ajax/add_friend/action.php?__pc=EXP1%3ADEFAULT";
 				$capt_opts[CURLOPT_POST] = true;
 				$capt_opts[CURLOPT_POSTFIELDS] = $query;
-				$ch = curl_init();
-				curl_setopt_array($ch, $capt_opts);
-				$content =  curl_exec($ch);
-				curl_close($ch);
+				$request = new \RollingCurlRequest($url);
+				$request->options = $capt_opts; 
+				$requests[] = $request;
 			}
 
-
-			
-		}
+			$rc = new \RollingCurl();
+			$rc->window_size = 20;
+			foreach ($requests as $value) {
+				$rc->add($value);
+			}
+			$rc->execute();
 
 	}
 
