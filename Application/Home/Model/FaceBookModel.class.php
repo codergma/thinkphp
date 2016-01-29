@@ -362,7 +362,11 @@ class FaceBookModel extends Model
 	private function catchFriendsHrefs(){
 		// 抓取我的好友页面
 		$capt_opts = $this->curl_opts;
-		$capt_opts[CURLOPT_URL] = $this->profile_href.'/friends';
+		if (stripos($this->profile_href,'?')) {
+			$capt_opts[CURLOPT_URL] = $this->profile_href.'&sk=friends';
+		}else{
+			$capt_opts[CURLOPT_URL] = $this->profile_href.'/friends';
+		}
 		$ch = curl_init();
 		curl_setopt_array($ch, $capt_opts);
 		$content = curl_exec($ch);
