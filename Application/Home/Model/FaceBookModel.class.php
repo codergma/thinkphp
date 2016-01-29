@@ -70,10 +70,6 @@ class FaceBookModel extends Model
 			'pass'=>$pass,
 			'persistent'=>1,
 			);
-		// foreach ($query as $key => $value) {
-		// 	$query[$key] = urlencode($value);
-		// }
-		// $query = http_build_query($query);
 
 		// 必须带上这个cookie，facebook用来检测是否时通过浏览器登录的
 		$cookie = 'fb_gate=https%3A%2F%2Fwww.facebook.com%2F; _js_reg_fb_ref=https%3A%2F%2Fwww.facebook.com%2F';
@@ -262,7 +258,7 @@ class FaceBookModel extends Model
 		$capt_opts = $this->curl_opts;
 		$url =  $this->base_url.'/ajax/reqs.php?__pc=EXP1%3ADEFAULT';
 		$capt_opts[CURLOPT_POST] = true;
-		preg_match_all("/class=\\\\\"objectListItem\\\\\" id=\\\\\"([\s\S]*)_1_req/iU", $content,$matches);
+		preg_match_all("/class=\\\\\"objectListItem jewelItemNew\\\\\" id=\\\\\"([\s\S]*)_1_req/iU", $content,$matches);
 		$confirm = $matches[1];
 
         
@@ -281,9 +277,6 @@ class FaceBookModel extends Model
 			"nctr[_mod]"=>"pagelet_bluebar",
 			"__user"=>$this->user_id,
 			"__a"=>"1",
-			// "__dyn"=>"7AmajEzUGBym5Q9UoGya4A5ER6yUmyUyGiyEyut9LFwxBxC9V8CdwIhEyfyUnwPzUaqwFUyp1-y28y2HoizZAKuEjK5o8UgyUf9VVpo9XxemFAdwIUsw",
-			// "__req"=>"z",
-			// "ttstamp"=>"26581701011128256497811410988",
 			"__rev"=>$this->version,
 			);
 			$capt_opts[CURLOPT_POSTFIELDS] = $query;
@@ -292,8 +285,16 @@ class FaceBookModel extends Model
 			$request->options = $capt_opts; 
 			$requests[] = $request;
         }
+        if (empty($requests)) {
+        	return ;
+        }
+
 		$rc = new \RollingCurl();
-		$rc->window_size = 20;
+		if (sizeof($requests) < 20) {
+			$rc->window_size = sizeof($requests);
+		}else{
+			$rc->window_size = 20;
+		}
 		foreach ($requests as $value) {
 			$rc->add($value);
 		}
@@ -327,8 +328,8 @@ class FaceBookModel extends Model
 			'fb_dtsg'=>$fb_dtsg,
 			'password_strength'=>'2',
 			'password_old'=>$this->pass,
-			'password_new'=>$this->oldpass,
-			'password_confirm'=>$this->oldpass,
+			'password_new'=>$this->new_pass,
+			'password_confirm'=>$this->new_pass,
 			'__user' => $this->user_id,
 			);
 		$capt_opts = array();
@@ -346,7 +347,7 @@ class FaceBookModel extends Model
 	}
 
 	/**
-	* 抓取好友
+	* 添加好友
 	*
 	*/
 	public function addFriends(){
@@ -393,28 +394,34 @@ class FaceBookModel extends Model
 		foreach ($friends_url as $url) {
 			// 抓取好友的好友页面
 			$capt_opts = $this->curl_opts;
-			// $ch = curl_init();
-			// curl_setopt_array($ch, $capt_opts);
-			// $content =  curl_exec($ch);
-			// curl_close($ch);
 			$request = new \RollingCurlRequest($url);
 			$request->options = $capt_opts; 
 			$requests[] = $request;
 		}
-		$rc = new \RollingCurl("$this->sendRequestCallBack");
-		$rc->window_size = 20;
+
+        if (empty($requests)) {
+        	return ;
+        }
+
+		$rc = new \RollingCurl(array($this,'sendRequestCallBack'));
+        if(sizeof($requests)<20){
+            $rc->window_size = sizeof($requests);
+        }else{
+            $rc->window_size = 20;
+        }
+
 		foreach ($requests as $value) {
 			$rc->add($value);
 		}
 		$rc->execute();
+	
+
 	}
 
-	private function sendRequestCallBack($response, $info=''){
+	public  function sendRequestCallBack($response, $info=''){
 			// 处理内容
 			$response = preg_replace("/<code[\s\S]*><!--/iU", "", $response);
 			$response = preg_replace("/--><\/code>/iU", "", $response);
-			// file_put_contents(CACHE_PATH.'addFriends_all_third.html',$content);
-			// $content = file_get_contents(CACHE_PATH.'addFriends_all_third.html');
 
 			// 分析html,获取添加好友需要的数据
 			\phpQuery::newDocumentHTML($response);
@@ -451,10 +458,7 @@ class FaceBookModel extends Model
 					"floc"=>"friends_tab",
 					"__user"=>$this->user_id,
 					"__a"=>"1",
-					// "__dyn"=>"7AmajEzUGBwzgDxyG9gigmzFEbEKA8Ay8Z9LFwxBxCbzES2N6xybxu3efy88awFUgx-y28y2GCEWfybDG4Upwzx2bwh9UK2uUjBGp3obe78",
-					// "__req"=>"4",
 					"fb_dtsg"=>$this->token,
-					// "ttstamp"=>"26581729999104896786675778",
 					"__rev"=>$this->version
 					);
 				$capt_opts = $this->curl_opts;
@@ -466,8 +470,17 @@ class FaceBookModel extends Model
 				$requests[] = $request;
 			}
 
+	        if (empty($requests)) {
+	        	return ;
+	        }
+
 			$rc = new \RollingCurl();
-			$rc->window_size = 20;
+			if (sizeof($requests)<20) {
+				$rc->window_size = sizeof($requests);
+			}else{
+				$rc->window_size = 20;
+			}
+			
 			foreach ($requests as $value) {
 				$rc->add($value);
 			}

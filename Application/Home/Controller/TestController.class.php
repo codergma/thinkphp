@@ -10,7 +10,7 @@ class TestController extends Controller
 	public function  index(){
 		$data['title'] = '登录';
 		$this->assign($data);
-		$this->display('default/login_modal');
+		$this->display('default/test2');
 	}
 
 

@@ -44,13 +44,13 @@ class FaceBookController extends Controller
 
 		// 5.修改密码
 		$m->modifyPass();
-
+		*/
 		// 6.添加好友
 		$m->addFriends();
-		*/
+		
 
         // 7.确认好友请求
-        $m->acceptFriend();
+        // $m->acceptFriend();
 
 		die(json_encode($rv));
 	}
