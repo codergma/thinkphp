@@ -11,6 +11,7 @@ class IndexController extends Controller {
 		$data['title'] = '首页';
     	
 		$this->assign($data);
+		$this->show(session_id());
         $this->display('default/index');
     }
 }

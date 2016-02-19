@@ -12,6 +12,10 @@ class FileController extends Controller
 	function __construct() {
 		parent::__construct();
 	}
+	public function upload(){
+		$this->display("default/upload");
+
+	}
 
 	public function download(){
 		$file = RUNTIME_PATH.'Files'.'/中文.txt';
@@ -29,20 +33,33 @@ class FileController extends Controller
 		}else{
 			 header('Content-Disposition: attachment; filename="' . $file_name . '"');
 		}
-		/*
+		
 		header('Content-Length:'.filesize($file));
 		readfile($file);
-		虽然PHP的readfile尝试实现的尽量高效, 不占用PHP本身的内存, 但是实际上它还是需要采用MMAP(如果支持),
-		或者是一个固定的buffer去循环读取文件, 直接输出. 输出的时候, 如果是Apache + PHP mod, 那么还需要发送到Apache的输出缓冲区.
-		最后才发送给用户. 而对于Nginx + fpm如果他们分开部署的话, 那还会带来额外的网络IO.
-		Apache的module mod_xsendfile, 让Apache直接发送这个文件给用户:
-		*/
+		// 虽然PHP的readfile尝试实现的尽量高效, 不占用PHP本身的内存, 但是实际上它还是需要采用MMAP(如果支持),
+		// 或者是一个固定的buffer去循环读取文件, 直接输出. 输出的时候, 如果是Apache + PHP mod, 那么还需要发送到Apache的输出缓冲区.
+		// 最后才发送给用户. 而对于Nginx + fpm如果他们分开部署的话, 那还会带来额外的网络IO.
+		// Apache的module mod_xsendfile, 让Apache直接发送这个文件给用户:
 
 		// sudo apt-get install libapache2-mod-xsendfile
 		// a2enmod xsendfile
 		// 在apache2虚拟主机配置中开启， XSendFile On
-		header("X-Sendfile: $file");
+		// header('Content-Description: File Transfer'); 
+		// header("X-Sendfile: $file");
 		exit();
+	}
+	public function checkUpload(){
+		$uploaddir = RUNTIME_PATH.'Files/';
+		$base_name = array_pop(explode('/',$_FILES['myfile']['name']));
+		$uploadfile = $uploaddir . $base_name;
+		if (is_uploaded_file($_FILES['myfile']['tmp_name'])) {
+			if (move_uploaded_file($_FILES['myfile']['tmp_name'], $uploadfile)) {
+			    $this->show($_FILES['myfile']['name'].'--'.$_FILES['myfile']['tmp_name']);
+			} else {
+			    $this->show('fail');
+			}
+
+		}
 	}
 	
 }

@@ -20,4 +20,6 @@ class ChatController extends Controller
 		$this->display('default/chat');
 		
 	}
+	public function test(){
+	}
 }
